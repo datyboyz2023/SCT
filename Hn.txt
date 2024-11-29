@@ -1,0 +1,58 @@
+import numpy as np
+
+class Neuron:
+    def __init__(self, weights):
+        self.weights = np.array(weights)  # Initialize the weight vector
+        self.activation = 0  # Activation value
+
+    def activate(self, pattern):
+        """Calculate the activation value based on the input pattern."""
+        self.activation = np.dot(self.weights, pattern)
+        return self.activation
+
+class HopfieldNetwork:
+    def __init__(self, weight_matrix):
+        self.neurons = [Neuron(weight_matrix[i]) for i in range(len(weight_matrix))]
+        self.outputs = np.zeros(len(weight_matrix))  # Initialize the output array
+
+    def threshold(self, activation):
+        """Threshold function to determine the binary output."""
+        return 1 if activation >= 0 else 0
+
+    def activate(self, pattern):
+        """Activate all neurons in the network with the input pattern."""
+        print("\nActivating the Hopfield network with pattern:", pattern)
+        for i, neuron in enumerate(self.neurons):
+            activation = neuron.activate(pattern)
+            self.outputs[i] = self.threshold(activation)
+            print(f"Neuron {i+1} - Activation: {activation}, Output: {self.outputs[i]}")
+
+    def check_recall(self, pattern):
+        """Check if the input pattern matches the output pattern."""
+        matches = [self.outputs[i] == pattern[i] for i in range(len(pattern))]
+        for i, match in enumerate(matches):
+            if match:
+                print(f"Pattern[{i}] = {pattern[i]} matches Output[{i}] = {self.outputs[i]}")
+            else:
+                print(f"Pattern[{i}] = {pattern[i]} does NOT match Output[{i}] = {self.outputs[i]}")
+
+# Define weights for the network
+weight_matrix = [
+    [0, -3, 3, -3],
+    [-3, 0, -3, 3],
+    [3, -3, 0, -3],
+    [-3, 3, -3, 0]
+]
+
+# Create Hopfield network
+hopfield_network = HopfieldNetwork(weight_matrix)
+
+# Pattern 1: [1, 0, 1, 0]
+pattern1 = [1, 0, 1, 0]
+hopfield_network.activate(pattern1)
+hopfield_network.check_recall(pattern1)
+
+# Pattern 2: [0, 1, 0, 1]
+pattern2 = [0, 1, 0, 1]
+hopfield_network.activate(pattern2)
+hopfield_network.check_recall(pattern2)

@@ -1,0 +1,84 @@
+import numpy as np
+
+# Initialize data
+np.set_printoptions(precision=4)
+v1 = np.array([0.6, 0.3])
+v2 = np.array([-0.1, 0.4])
+w = np.array([-0.2, 0.4, 0.1])
+b1, b2 = 0.3, 0.5
+x = np.array([0, 1])  # Inputs x1 and x2
+alpha = 0.25  # Learning rate
+
+# Sigmoid activation function and its derivative
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+def sigmoid_derivative(y):
+    return y * (1 - y)
+
+# Forward propagation
+def forward_propagation(x, v1, v2, w, b1, b2):
+    zin1 = b1 + np.dot(x, np.array([v1[0], v2[0]]))
+    zin2 = b2 + np.dot(x, np.array([v1[1], v2[1]]))
+    # Apply activation function
+    z1 = sigmoid(zin1)
+    z2 = sigmoid(zin2)
+    # Net input to the output layer
+    yin = w[0] + z1 * w[1] + z2 * w[2]
+    y = sigmoid(yin)
+    return z1, z2, y, yin
+
+# Backward propagation
+def backward_propagation(z1, z2, y, yin, w, x, alpha, b1, b2):
+    fyin = sigmoid_derivative(y)
+    error = (1 - y) * fyin  # Error at the output layer
+
+    # Compute delta weights for the output layer
+    dw1 = alpha * error * z1
+    dw2 = alpha * error * z2
+    dw0 = alpha * error
+
+    # Compute error at the hidden layer
+    din1 = error * w[1]
+    din2 = error * w[2]
+
+    # Error deltas for the hidden layer
+    d1 = din1 * sigmoid_derivative(z1)
+    d2 = din2 * sigmoid_derivative(z2)
+
+    # Delta weights between input and hidden layer
+    dv11 = alpha * d1 * x[0]
+    dv21 = alpha * d1 * x[1]
+    dv01 = alpha * d1
+    dv12 = alpha * d2 * x[0]
+    dv22 = alpha * d2 * x[1]
+    dv02 = alpha * d2
+
+    # Update weights and biases
+    v1[0] += dv11
+    v1[1] += dv12
+    v2[0] += dv21
+    v2[1] += dv22
+    w[1] += dw1
+    w[2] += dw2
+    w[0] += dw0
+    b1 += dv01
+    b2 += dv02
+
+    return v1, v2, w, b1, b2
+
+# Training step
+def train_network(x, v1, v2, w, b1, b2, alpha):
+    print("=== Forward Propagation ===")
+    z1, z2, y, yin = forward_propagation(x, v1, v2, w, b1, b2)
+    print(f"z1 = {z1}, z2 = {z2}, y = {y}")
+
+    print("\n=== Backward Propagation ===")
+    v1, v2, w, b1, b2 = backward_propagation(z1, z2, y, yin, w, x, alpha, b1, b2)
+    print("\nUpdated weights and biases:")
+    print(f"v1 = {v1}, v2 = {v2}")
+    print(f"w = {w}")
+    print(f"b1 = {b1}, b2 = {b2}")
+
+# Execute training step
+train_network(x, v1, v2, w, b1, b2, alpha)

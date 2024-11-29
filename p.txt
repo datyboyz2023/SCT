@@ -1,0 +1,74 @@
+import numpy as np
+
+class Perceptron:
+    def __init__(self, input_size, learning_rate=1, epochs=10):
+        # Initialize weights and bias
+        self.weights = np.zeros(input_size + 1)  # +1 for bias
+        self.learning_rate = learning_rate
+        self.epochs = epochs
+    
+    def activation_function(self, x):
+        # Step function
+        return 1 if x >= 0 else 0
+
+    def predict(self, inputs):
+        # Compute weighted sum
+        weighted_sum = np.dot(inputs, self.weights[1:]) + self.weights[0]
+        return self.activation_function(weighted_sum)
+
+    def train(self, training_inputs, labels):
+        for epoch in range(self.epochs):
+            print(f"Epoch {epoch + 1}/{self.epochs}")
+            for inputs, label in zip(training_inputs, labels):
+                prediction = self.predict(inputs)
+                # Update weights and bias
+                error = label - prediction
+                self.weights[1:] += self.learning_rate * error * inputs
+                self.weights[0] += self.learning_rate * error
+                print(f"Inputs: {inputs}, Prediction: {prediction}, Error: {error}, Updated Weights: {self.weights}")
+        print(f"Final Weights after training: {self.weights}")
+
+    def test(self, test_cases):
+        for inputs in test_cases:
+            output = self.predict(np.array(inputs))
+            print(f"Input: {inputs}, Output: {output}")
+
+def main():
+    # Define training data and labels for AND gate
+    and_training_inputs = np.array([
+        [-1, -1],
+        [-1, 1],
+        [1, -1],
+        [1, 1]
+    ])
+    and_labels = np.array([0, 0, 0, 1])  # AND gate outputs
+
+    # Initialize and train Perceptron for AND gate
+    and_perceptron = Perceptron(input_size=2)
+    print("Training AND Gate Perceptron:")
+    and_perceptron.train(and_training_inputs, and_labels)
+
+    # Test AND gate
+    print("\nTesting AND Gate:")
+    and_perceptron.test(and_training_inputs)
+
+    # Define training data and labels for OR gate
+    or_training_inputs = np.array([
+        [0, 0],
+        [0, 1],
+        [1, 0],
+        [1, 1]
+    ])
+    or_labels = np.array([0, 1, 1, 1])  # OR gate outputs
+
+    # Initialize and train Perceptron for OR gate
+    or_perceptron = Perceptron(input_size=2)
+    print("\nTraining OR Gate Perceptron:")
+    or_perceptron.train(or_training_inputs, or_labels)
+
+    # Test OR gate
+    print("\nTesting OR Gate:")
+    or_perceptron.test(or_training_inputs)
+
+if __name__ == "__main__":
+    main()

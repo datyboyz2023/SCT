@@ -1,0 +1,61 @@
+import math
+
+# Activation function: Tanh
+def tanh(x):
+    return math.tanh(x)
+
+# Derivative of the Tanh function
+def tanh_derivative(x):
+    return 1 - x ** 2
+
+# Forward propagation
+def forward_pass(a0, w1, b1, w2, b2):
+    # First hidden layer
+    n1 = w1 * a0 + b1
+    a1 = tanh(n1)
+    # Output layer
+    n2 = w2 * a1 + b2
+    a2 = tanh(n2)
+    return a1, a2
+
+# Backward propagation
+def backward_pass(a0, a1, a2, t, w2):
+    # Calculate error
+    e = t - a2
+    # Calculate sensitivities (deltas)
+    s2 = -2 * tanh_derivative(a2) * e
+    s1 = tanh_derivative(a1) * w2 * s2
+    return s1, s2
+
+# Update weights and biases
+def update_weights_and_biases(w1, w2, b1, b2, a0, a1, s1, s2, c):
+    w1_new = w1 - c * s1 * a0
+    w2_new = w2 - c * s2 * a1
+    b1_new = b1 - c * s1
+    b2_new = b2 - c * s2
+    return w1_new, w2_new, b1_new, b2_new
+
+# Input values
+a0 = -1  # Input for the first neuron
+t = -1  # Target output
+w10 = float(input("Enter weight of the first network: "))
+b10 = float(input("Enter bias of the first network: "))
+w20 = float(input("Enter weight of the second network: "))
+b20 = float(input("Enter bias of the second network: "))
+c = float(input("Enter learning coefficient: "))
+
+# Forward pass
+a1, a2 = forward_pass(a0, w10, b10, w20, b20)
+print(f"Output after forward pass: a2 = {a2}")
+
+# Backward pass
+s1, s2 = backward_pass(a0, a1, a2, t, w20)
+
+# Update weights and biases
+w11, w21, b11, b21 = update_weights_and_biases(w10, w20, b10, b20, a0, a1, s1, s2, c)
+
+# Results
+print(f"The updated weight of the first network (w11) = {w11}")
+print(f"The updated weight of the second network (w21) = {w21}")
+print(f"The updated bias of the first network (b11) = {b11}")
+print(f"The updated bias of the second network (b21) = {b21}")

@@ -1,0 +1,50 @@
+import numpy as np
+
+class DeltaRule:
+    def __init__(self, input_size, learning_rate=0.01, epochs=10):
+        # Initialize weights to small random values and bias to zero
+        self.weights = np.random.rand(input_size)
+        self.bias = 0
+        self.learning_rate = learning_rate
+        self.epochs = epochs
+
+    def predict(self, x):
+        # Calculate the linear combination (weighted sum + bias)
+        return np.dot(x, self.weights) + self.bias
+
+    def train(self, X, y):
+        # Training using the Delta Rule
+        for epoch in range(self.epochs):
+            total_error = 0
+            for inputs, target in zip(X, y):
+                output = self.predict(inputs)
+                error = target - output
+                total_error += error ** 2
+                # Update weights and bias
+                self.weights += self.learning_rate * error * inputs
+                self.bias += self.learning_rate * error
+            print(f"Epoch {epoch + 1}/{self.epochs}, Total Error: {total_error}")
+
+    def print_final_weights(self):
+        print(f"Final Weights: {self.weights}")
+        print(f"Final Bias: {self.bias}")
+
+
+# Simple dataset for a linear problem (OR gate)
+X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
+y = np.array([0, 1, 1, 1])  # OR problem
+
+# Initialize the Delta Rule model
+delta_model = DeltaRule(input_size=2, learning_rate=0.1, epochs=10)
+
+# Train the model
+delta_model.train(X, y)
+
+# Output the final weights and bias
+delta_model.print_final_weights()
+
+# Testing the model with the same inputs
+print("\nTesting the Model:")
+for inputs in X:
+    result = delta_model.predict(inputs)
+    print(f"Input: {inputs}, Prediction: {result}, Rounded: {np.round(result)}")

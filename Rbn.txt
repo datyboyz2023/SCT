@@ -1,0 +1,63 @@
+import numpy as np
+from scipy.linalg import norm, pinv
+import matplotlib.pyplot as plt
+
+class RBF:
+    def __init__(self, indim, numCenters, outdim, beta=8):
+        self.indim = indim
+        self.outdim = outdim
+        self.numCenters = numCenters
+        self.beta = beta
+        self.centers = np.random.uniform(-1, 1, (numCenters, indim))
+        self.W = np.random.random((numCenters, outdim))
+
+    def _basisfunc(self, c, d):
+        """Gaussian RBF"""
+        return np.exp(-self.beta * norm(c - d) ** 2)
+
+    def _calcAct(self, X):
+        """Calculate activations of RBFs for input X"""
+        G = np.zeros((X.shape[0], self.numCenters))
+        for ci, c in enumerate(self.centers):
+            G[:, ci] = np.exp(-self.beta * np.linalg.norm(X - c, axis=1) ** 2)
+        return G
+
+    def train(self, X, Y):
+        """Train the RBF network using input X and output Y"""
+        # Choose random center vectors from training set
+        rnd_idx = np.random.permutation(X.shape[0])[:self.numCenters]
+        self.centers = X[rnd_idx, :]
+        print("Centers:\n", self.centers)
+        # Calculate activations of RBFs
+        G = self._calcAct(X)
+        # Compute output weights (pseudoinverse)
+        self.W = np.dot(pinv(G), Y)
+        print("Weights:\n", self.W)
+
+    def test(self, X):
+        """Predict output for input X"""
+        G = self._calcAct(X)
+        return np.dot(G, self.W)
+
+if __name__ == '__main__':
+    n = 100
+    x = np.linspace(-1, 1, n).reshape(-1, 1)
+    # Generate target data with noise
+    y = np.sin(3 * (x + 0.5) ** 3 - 1) + np.random.normal(0, 0.1, x.shape)
+
+    # Train RBF
+    rbf = RBF(indim=1, numCenters=10, outdim=1)
+    rbf.train(x, y)
+
+    # Test RBF
+    z = rbf.test(x)
+
+    # Plot original data and RBF prediction
+    plt.figure(figsize=(10, 6))
+    plt.plot(x, y, 'k-', label="Original Data")
+    plt.plot(x, z, 'r-', label="RBF Prediction", linewidth=2)
+    # Plot RBF centers
+    plt.plot(rbf.centers, np.zeros(rbf.numCenters), 'gs', label="RBF Centers")
+    plt.legend()
+    plt.title("Radial Basis Function Network")
+    plt.show()
